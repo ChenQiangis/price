@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>投资成本计算器 · 手机/电脑通用版</title>
+    <title>持仓成本计算器 · 自动保存版</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,7 +18,6 @@
             color: #1f2f3e;
         }
 
-        /* 主容器 - 卡片风格，移动优先 */
         .app-container {
             max-width: 650px;
             margin: 0 auto;
@@ -27,13 +26,11 @@
             gap: 18px;
         }
 
-        /* 公用卡片 */
         .card {
             background: #ffffff;
             border-radius: 28px;
             padding: 20px 18px;
             box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s;
             border: 1px solid #eef2f8;
         }
 
@@ -66,7 +63,6 @@
             font-weight: 500;
         }
 
-        /* 交易列表区域 - 移动端滚动舒适 */
         .trade-list {
             overflow-x: auto;
             margin: 0 -6px;
@@ -75,7 +71,7 @@
 
         .trade-table {
             width: 100%;
-            min-width: 500px;
+            min-width: 550px;
             border-collapse: collapse;
             font-size: 0.85rem;
         }
@@ -94,7 +90,6 @@
             vertical-align: middle;
         }
 
-        /* 交易类型徽章 */
         .type-badge {
             display: inline-block;
             padding: 6px 14px;
@@ -105,17 +100,9 @@
             text-align: center;
         }
 
-        .type-buy {
-            background: #e0f7ea;
-            color: #0b6e41;
-        }
+        .type-buy { background: #e0f7ea; color: #0b6e41; }
+        .type-sell { background: #ffe6e3; color: #bc1c2e; }
 
-        .type-sell {
-            background: #ffe6e3;
-            color: #bc1c2e;
-        }
-
-        /* 输入框样式，触摸友好 */
         .input-micro {
             width: 88px;
             padding: 8px 8px;
@@ -171,7 +158,6 @@
             color: #d14545;
         }
 
-        /* 费率设置行 网格布局 */
         .fee-grid {
             display: flex;
             flex-wrap: wrap;
@@ -204,7 +190,6 @@
             font-weight: 500;
         }
 
-        /* 结果卡片 */
         .result-grid {
             display: flex;
             flex-wrap: wrap;
@@ -240,7 +225,6 @@
             color: #da7b2c;
         }
 
-        /* 按钮组 */
         .button-group {
             display: flex;
             flex-wrap: wrap;
@@ -288,36 +272,19 @@
             margin-top: 10px;
         }
 
-        /* 电脑优化 - 最大宽度舒适 */
-        @media (min-width: 760px) {
-            body {
-                padding: 28px;
-            }
-            .app-container {
-                max-width: 1100px;
-            }
-            .trade-table {
-                min-width: auto;
-            }
-            .input-micro {
-                width: 100px;
-                padding: 10px;
-            }
-            .result-number {
-                font-size: 1.4rem;
-            }
-        }
-
-        /* 触摸反馈 */
-        button, .btn, .delete-btn, input {
-            touch-action: manipulation;
-        }
-
         .empty-rows {
             text-align: center;
             color: #8da0b5;
             padding: 30px 10px;
             font-size: 0.85rem;
+        }
+
+        @media (min-width: 760px) {
+            body { padding: 28px; }
+            .app-container { max-width: 1100px; }
+            .trade-table { min-width: auto; }
+            .input-micro { width: 100px; padding: 10px; }
+            .result-number { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -326,11 +293,11 @@
     <!-- 交易流水卡片 -->
     <div class="card">
         <div class="card-header">
-            <h2>📋 交易流水 <span class="badge-sm">每笔费用明细</span></h2>
+            <h2>📋 交易流水 <span class="badge-sm">自动保存到本地</span></h2>
             <div class="button-group" style="margin-top:0;">
                 <button class="btn btn-outline" id="addBuyBtn">➕ 买入</button>
                 <button class="btn btn-outline" id="addSellBtn">📤 卖出</button>
-                <button class="btn btn-outline" id="resetBtn">🗑️ 清空</button>
+                <button class="btn btn-outline" id="resetBtn">🗑️ 清空全部</button>
             </div>
         </div>
         <div class="trade-list">
@@ -339,42 +306,28 @@
                 <tr><th>类型</th><th>价格(元)</th><th>股数</th><th>本次净现金流</th><th>费用明细</th><th>持仓成本</th><th></th></tr>
                 </thead>
                 <tbody id="tradeTbody">
-                    <tr><td colspan="7" class="empty-rows">暂无交易，点击「买入」或「卖出」开始</td></tr>
+                <tr><td colspan="7" class="empty-rows">✨ 暂无交易，点击「买入」或「卖出」添加</td></tr>
                 </tbody>
             </table>
         </div>
-        <div class="footnote" style="border-top: none; margin-top: 8px; text-align: left;">
-            💡 买入净额 = -(金额+佣金+过户费) &nbsp;&nbsp;|&nbsp;&nbsp; 卖出净额 = 金额-佣金-印花税-过户费
+        <div class="footnote" style="border-top:none; text-align:left;">
+            💡 添加交易后价格/股数留空，请手动填写真实数据。所有记录会自动保存在浏览器中。
         </div>
     </div>
 
     <!-- 费率卡片 -->
     <div class="card">
-        <div class="card-header">
-            <h2>⚙️ 费率设置</h2>
-        </div>
+        <div class="card-header"><h2>⚙️ 费率设置</h2></div>
         <div class="fee-grid">
-            <div class="fee-item">
-                <label>📌 单笔佣金 (元/笔)</label>
-                <input type="number" id="commissionFee" step="1" value="5" placeholder="固定佣金">
-            </div>
-            <div class="fee-item">
-                <label>🧾 印花税率 (%)</label>
-                <input type="number" id="stampTax" step="0.01" value="0.05" placeholder="卖出时征收">
-                <div style="font-size:10px; color:#7895b2;">ETF为0%</div>
-            </div>
-            <div class="fee-item">
-                <label>📄 过户费 (元/万股)</label>
-                <input type="number" id="transferFee" step="0.1" value="0" placeholder="ETF为0">
-            </div>
+            <div class="fee-item"><label>📌 单笔佣金 (元/笔)</label><input type="number" id="commissionFee" step="1" value="5"></div>
+            <div class="fee-item"><label>🧾 印花税率 (%)</label><input type="number" id="stampTax" step="0.01" value="0.05"><div style="font-size:10px;">ETF为0%</div></div>
+            <div class="fee-item"><label>📄 过户费 (元/万股)</label><input type="number" id="transferFee" step="0.1" value="0"></div>
         </div>
     </div>
 
     <!-- 持仓概览卡片 -->
     <div class="card">
-        <div class="card-header">
-            <h2>📈 持仓概览</h2>
-        </div>
+        <div class="card-header"><h2>📈 持仓概览</h2></div>
         <div class="result-grid">
             <div class="result-block"><div class="result-label">📦 持股数量</div><div class="result-number" id="sharesCount">0</div></div>
             <div class="result-block"><div class="result-label">✨ 每股成本</div><div class="result-number highlight-number" id="avgCostVal">0.0000 元</div></div>
@@ -385,37 +338,61 @@
             <div class="result-block"><div class="result-label">📊 浮动盈亏</div><div class="result-number" id="floatProfit">0.00 元</div></div>
             <div class="result-block"><div class="result-label">💰 总支出(含费)</div><div class="result-number" id="totalExp">0.00 元</div></div>
         </div>
-        <button class="btn btn-primary" id="refreshCalcBtn" style="margin-top: 8px;">⟳ 刷新计算</button>
+        <button class="btn btn-primary" id="refreshCalcBtn" style="margin-top:8px;">⟳ 刷新计算</button>
     </div>
-    <div class="footnote">
-        * 持仓市值基于最新交易价格估算，浮动盈亏随价格变化。<br>
-        * 初始示例为空，所有记录为0，方便手机端直接录入。
-    </div>
+    <div class="footnote">* 所有交易记录自动保存至你的设备，关闭页面或换设备打开同一链接依然存在（本地存储）。</div>
 </div>
 
 <script>
-    // ---------- 交易数据结构，初始为空示例 ----------
+    // ---------- 存储KEY ----------
+    const STORAGE_KEY = 'trade_calculator_data';
+    const FEE_KEY = 'trade_calculator_fees';
+
+    // ---------- 全局交易数据 ----------
     let transactions = [];   // 每个元素 { id, type, price, shares }
 
-    // DOM 元素
-    const tbody = document.getElementById('tradeTbody');
-    const addBuyBtn = document.getElementById('addBuyBtn');
-    const addSellBtn = document.getElementById('addSellBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const refreshBtn = document.getElementById('refreshCalcBtn');
+    // ---------- 辅助函数：保存到 localStorage ----------
+    function saveTransactions() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    }
 
-    const commissionInput = document.getElementById('commissionFee');
-    const stampInput = document.getElementById('stampTax');
-    const transferInput = document.getElementById('transferFee');
+    function loadTransactions() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            try {
+                transactions = JSON.parse(raw);
+                // 保证每条记录都有id (旧数据兼容)
+                if (!transactions.some(t => t.id === undefined)) {
+                    transactions = transactions.map(t => ({ ...t, id: t.id || Date.now() + Math.random() }));
+                }
+            } catch(e) { transactions = []; }
+        } else {
+            transactions = [];
+        }
+    }
 
-    const sharesCountSpan = document.getElementById('sharesCount');
-    const avgCostSpan = document.getElementById('avgCostVal');
-    const netInvestSpan = document.getElementById('netInvestVal');
-    const marketValueSpan = document.getElementById('marketValue');
-    const floatProfitSpan = document.getElementById('floatProfit');
-    const totalExpSpan = document.getElementById('totalExp');
+    function saveFees() {
+        const fees = {
+            commission: document.getElementById('commissionFee').value,
+            stamp: document.getElementById('stampTax').value,
+            transfer: document.getElementById('transferFee').value
+        };
+        localStorage.setItem(FEE_KEY, JSON.stringify(fees));
+    }
 
-    // ---------- 费用核心函数 ----------
+    function loadFees() {
+        const raw = localStorage.getItem(FEE_KEY);
+        if (raw) {
+            try {
+                const fees = JSON.parse(raw);
+                if (fees.commission !== undefined) document.getElementById('commissionFee').value = fees.commission;
+                if (fees.stamp !== undefined) document.getElementById('stampTax').value = fees.stamp;
+                if (fees.transfer !== undefined) document.getElementById('transferFee').value = fees.transfer;
+            } catch(e) {}
+        }
+    }
+
+    // ---------- 费用计算逻辑 ----------
     function calcBuyFlow(price, shares, comm, transPer10k) {
         const amount = price * shares;
         let transfer = transPer10k > 0 ? (amount / 10000) * transPer10k : 0;
@@ -431,11 +408,11 @@
         return { amount, commission: comm, stamp, transfer, totalIn };
     }
 
-    // 获取完整统计数据（支出/收入/净股数/平均成本/最新市值）
+    // 综合统计
     function computeStats() {
-        let comm = parseFloat(commissionInput.value) || 0;
-        let stampRate = parseFloat(stampInput.value) || 0;
-        let transPer10k = parseFloat(transferInput.value) || 0;
+        let comm = parseFloat(document.getElementById('commissionFee').value) || 0;
+        let stampRate = parseFloat(document.getElementById('stampTax').value) || 0;
+        let transPer10k = parseFloat(document.getElementById('transferFee').value) || 0;
 
         let totalExp = 0, totalIncome = 0, netShares = 0;
         for (let tx of transactions) {
@@ -458,7 +435,6 @@
         else if (netShares === 0) avgCost = 0;
         else avgCost = -1;
 
-        // 最新市价 (取最后一笔交易价格)
         let lastPrice = 1.0;
         if (transactions.length > 0) {
             for (let i = transactions.length-1; i >= 0; i--) {
@@ -473,159 +449,179 @@
         return { netShares, totalExp, totalIncome, netInvest, avgCost, currentMktValue, floatProfit, lastPrice };
     }
 
-    // 渲染表格 + 更新所有数值（手机触摸优化）
-    function renderAndUpdate() {
-        // 渲染交易表格
+    // 渲染表格 + 刷新统计（同时保存交易数据）
+    function renderAndSave() {
+        // 保存当前交易数据
+        saveTransactions();
+
+        const tbody = document.getElementById('tradeTbody');
         if (transactions.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-rows">✨ 暂无交易，点击「买入」或「卖出」开始</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="empty-rows">✨ 暂无交易，点击「买入」或「卖出」添加记录</td></tr>';
         } else {
             let html = '';
             for (let i = 0; i < transactions.length; i++) {
                 const tx = transactions[i];
-                const priceVal = parseFloat(tx.price);
-                const sharesVal = parseInt(tx.shares);
-                if (isNaN(priceVal) || isNaN(sharesVal) || sharesVal <= 0 || priceVal <= 0) continue;
-                
-                // 获取费率用于本次展示
-                const commNow = parseFloat(commissionInput.value) || 0;
-                const stampNow = parseFloat(stampInput.value) || 0;
-                const transNow = parseFloat(transferInput.value) || 0;
-                let cashFlow = 0;
-                let feeDesc = '';
-                if (tx.type === 'buy') {
-                    const buyRes = calcBuyFlow(priceVal, sharesVal, commNow, transNow);
-                    cashFlow = -buyRes.totalOut;
-                    feeDesc = `佣 ${buyRes.commission.toFixed(2)} | 过 ${buyRes.transfer.toFixed(2)}`;
+                const priceVal = tx.price !== undefined && !isNaN(parseFloat(tx.price)) ? parseFloat(tx.price) : '';
+                const sharesVal = tx.shares !== undefined && !isNaN(parseInt(tx.shares)) ? parseInt(tx.shares) : '';
+
+                // 展示本次现金流和费用明细（基于当前费率）
+                const commNow = parseFloat(document.getElementById('commissionFee').value) || 0;
+                const stampNow = parseFloat(document.getElementById('stampTax').value) || 0;
+                const transNow = parseFloat(document.getElementById('transferFee').value) || 0;
+                let cashFlow = 0, feeDesc = '';
+                let validForPreview = (typeof priceVal === 'number' && !isNaN(priceVal) && priceVal > 0 && typeof sharesVal === 'number' && !isNaN(sharesVal) && sharesVal > 0);
+                if (validForPreview) {
+                    if (tx.type === 'buy') {
+                        const buyRes = calcBuyFlow(priceVal, sharesVal, commNow, transNow);
+                        cashFlow = -buyRes.totalOut;
+                        feeDesc = `佣 ${buyRes.commission.toFixed(2)} | 过 ${buyRes.transfer.toFixed(2)}`;
+                    } else {
+                        const sellRes = calcSellFlow(priceVal, sharesVal, commNow, stampNow, transNow);
+                        cashFlow = sellRes.totalIn;
+                        feeDesc = `佣 ${sellRes.commission.toFixed(2)} | 印 ${sellRes.stamp.toFixed(2)} | 过 ${sellRes.transfer.toFixed(2)}`;
+                    }
                 } else {
-                    const sellRes = calcSellFlow(priceVal, sharesVal, commNow, stampNow, transNow);
-                    cashFlow = sellRes.totalIn;
-                    feeDesc = `佣 ${sellRes.commission.toFixed(2)} | 印 ${sellRes.stamp.toFixed(2)} | 过 ${sellRes.transfer.toFixed(2)}`;
+                    cashFlow = 0;
+                    feeDesc = '待填数据';
                 }
-                
-                // 计算截止到该笔的“持仓成本金额” (累计净投入)
+
+                // 计算截止到这一笔的累计持仓成本金额
                 let simExp = 0, simInc = 0, simShares = 0;
                 for (let j = 0; j <= i; j++) {
-                    const ttx = transactions[j];
-                    const p = parseFloat(ttx.price);
-                    const s = parseInt(ttx.shares);
-                    if (isNaN(p) || isNaN(s) || s <= 0) continue;
-                    const commT = parseFloat(commissionInput.value)||0;
-                    const stampT = parseFloat(stampInput.value)||0;
-                    const transT = parseFloat(transferInput.value)||0;
-                    if (ttx.type === 'buy') {
-                        const buyT = calcBuyFlow(p, s, commT, transT);
-                        simExp += buyT.totalOut;
+                    const t = transactions[j];
+                    const p = parseFloat(t.price);
+                    const s = parseInt(t.shares);
+                    if (isNaN(p) || isNaN(s) || s <= 0 || p <= 0) continue;
+                    const commT = parseFloat(document.getElementById('commissionFee').value) || 0;
+                    const stampT = parseFloat(document.getElementById('stampTax').value) || 0;
+                    const transT = parseFloat(document.getElementById('transferFee').value) || 0;
+                    if (t.type === 'buy') {
+                        const b = calcBuyFlow(p, s, commT, transT);
+                        simExp += b.totalOut;
                         simShares += s;
                     } else {
-                        const sellT = calcSellFlow(p, s, commT, stampT, transT);
-                        simInc += sellT.totalIn;
+                        const sel = calcSellFlow(p, s, commT, stampT, transT);
+                        simInc += sel.totalIn;
                         simShares -= s;
                     }
                 }
                 const netInvestNow = simExp - simInc;
                 const holdingAmount = (simShares > 0) ? netInvestNow : 0;
-                
+                const displayHolding = (simShares > 0 && holdingAmount > 0) ? holdingAmount.toFixed(2) : '0.00';
+
                 const typeLabel = tx.type === 'buy' ? '买入' : '卖出';
                 const typeClass = tx.type === 'buy' ? 'type-buy' : 'type-sell';
+                const priceDisplay = (typeof priceVal === 'number' && !isNaN(priceVal)) ? priceVal : '';
+                const sharesDisplay = (typeof sharesVal === 'number' && !isNaN(sharesVal)) ? sharesVal : '';
                 html += `<tr>
                     <td><span class="type-badge ${typeClass}">${typeLabel}</span></td>
-                    <td><input type="number" step="0.001" class="input-micro edit-price" value="${priceVal}" data-idx="${i}" style="width:85px;"></td>
-                    <td><input type="number" step="1" class="input-micro edit-shares" value="${sharesVal}" data-idx="${i}" style="width:80px;"></td>
-                    <td><span class="cash-number">${cashFlow.toFixed(2)}</span></td>
+                    <td><input type="number" step="0.001" class="input-micro edit-price" value="${priceDisplay}" data-idx="${i}" placeholder="价格" style="width:85px;"></td>
+                    <td><input type="number" step="1" class="input-micro edit-shares" value="${sharesDisplay}" data-idx="${i}" placeholder="股数" style="width:80px;"></td>
+                    <td><span class="cash-number">${validForPreview ? cashFlow.toFixed(2) : '—'}</span></td>
                     <td><span class="fee-detail-text">${feeDesc}</span></td>
-                    <td><span class="cash-number">${holdingAmount.toFixed(2)} 元</span></td>
+                    <td><span class="cash-number">${displayHolding} 元</span></td>
                     <td><button class="delete-btn" data-remove="${i}">✕</button></td>
                 </tr>`;
             }
             tbody.innerHTML = html;
-            
+
             // 绑定编辑事件
             document.querySelectorAll('.edit-price').forEach(inp => {
-                inp.onchange = (e) => {
-                    let idx = parseInt(e.target.dataset.idx);
-                    let newPrice = parseFloat(e.target.value);
-                    if (!isNaN(newPrice) && transactions[idx]) transactions[idx].price = newPrice;
-                    renderAndUpdate();
-                };
+                inp.removeEventListener('change', handlePriceChange);
+                inp.addEventListener('change', handlePriceChange);
             });
             document.querySelectorAll('.edit-shares').forEach(inp => {
-                inp.onchange = (e) => {
-                    let idx = parseInt(e.target.dataset.idx);
-                    let newShares = parseInt(e.target.value);
-                    if (!isNaN(newShares) && newShares > 0 && transactions[idx]) transactions[idx].shares = newShares;
-                    renderAndUpdate();
-                };
+                inp.removeEventListener('change', handleSharesChange);
+                inp.addEventListener('change', handleSharesChange);
             });
             document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    let idx = parseInt(btn.dataset.remove);
-                    if (!isNaN(idx) && transactions[idx]) {
-                        transactions.splice(idx, 1);
-                        renderAndUpdate();
-                    }
-                };
+                btn.removeEventListener('click', handleDelete);
+                btn.addEventListener('click', handleDelete);
             });
         }
-        
-        // 更新统计数字
+
+        // 更新底部统计
         const stats = computeStats();
-        sharesCountSpan.innerText = stats.netShares >= 0 ? `${stats.netShares} 股` : (stats.netShares<0 ? '空仓' : '0');
-        avgCostSpan.innerText = (stats.avgCost > 0 ? stats.avgCost.toFixed(4) : (stats.netShares===0 ? '0.0000' : '----')) + ' 元';
-        netInvestSpan.innerText = stats.netInvest.toFixed(2) + ' 元';
-        marketValueSpan.innerText = stats.currentMktValue.toFixed(2) + ' 元';
-        floatProfitSpan.innerText = (stats.floatProfit >= 0 ? `+${stats.floatProfit.toFixed(2)}` : `${stats.floatProfit.toFixed(2)}`) + ' 元';
-        totalExpSpan.innerText = stats.totalExp.toFixed(2) + ' 元';
+        document.getElementById('sharesCount').innerText = stats.netShares >= 0 ? `${stats.netShares} 股` : (stats.netShares<0 ? '空仓' : '0');
+        document.getElementById('avgCostVal').innerText = (stats.avgCost > 0 ? stats.avgCost.toFixed(4) : (stats.netShares===0 ? '0.0000' : '----')) + ' 元';
+        document.getElementById('netInvestVal').innerText = stats.netInvest.toFixed(2) + ' 元';
+        document.getElementById('marketValue').innerText = stats.currentMktValue.toFixed(2) + ' 元';
+        document.getElementById('floatProfit').innerText = (stats.floatProfit >= 0 ? `+${stats.floatProfit.toFixed(2)}` : `${stats.floatProfit.toFixed(2)}`) + ' 元';
+        document.getElementById('totalExp').innerText = stats.totalExp.toFixed(2) + ' 元';
     }
-    
-    // 添加交易
-    function addTransaction(type) {
-        let defaultPrice = 1.50;
-        if (transactions.length > 0) {
-            const lastTx = transactions[transactions.length-1];
-            if (lastTx && typeof lastTx.price === 'number') {
-                defaultPrice = type === 'buy' ? lastTx.price * 0.98 : lastTx.price * 1.02;
-                defaultPrice = Math.round(defaultPrice * 1000) / 1000;
-                if (defaultPrice <= 0) defaultPrice = 1.50;
-            }
-        } else {
-            defaultPrice = type === 'buy' ? 1.50 : 1.52;
+
+    function handlePriceChange(e) {
+        let idx = parseInt(e.target.dataset.idx);
+        let newPrice = parseFloat(e.target.value);
+        if (!isNaN(newPrice) && transactions[idx]) {
+            transactions[idx].price = newPrice;
+        } else if (transactions[idx]) {
+            transactions[idx].price = undefined;
         }
+        renderAndSave();
+    }
+
+    function handleSharesChange(e) {
+        let idx = parseInt(e.target.dataset.idx);
+        let newShares = parseInt(e.target.value);
+        if (!isNaN(newShares) && newShares > 0 && transactions[idx]) {
+            transactions[idx].shares = newShares;
+        } else if (transactions[idx]) {
+            transactions[idx].shares = undefined;
+        }
+        renderAndSave();
+    }
+
+    function handleDelete(e) {
+        let idx = parseInt(e.target.dataset.remove);
+        if (!isNaN(idx) && transactions[idx]) {
+            transactions.splice(idx, 1);
+            renderAndSave();
+        }
+    }
+
+    // 添加交易记录（价格/股数均为空）
+    function addTransaction(type) {
         transactions.push({
             id: Date.now() + Math.random(),
             type: type,
-            price: defaultPrice,
-            shares: 200
+            price: undefined,
+            shares: undefined
         });
-        renderAndUpdate();
+        renderAndSave();
     }
-    
-    // 清空全部交易
-    function resetAllTransactions() {
-        transactions = [];
-        renderAndUpdate();
+
+    // 重置所有记录
+    function resetAll() {
+        if (confirm('⚠️ 清空所有交易记录，无法恢复。确定吗？')) {
+            transactions = [];
+            renderAndSave();
+        }
     }
-    
-    // 强制刷新（费率改变时使用）
-    function forceRefresh() {
-        renderAndUpdate();
-    }
-    
-    // 绑定费率事件
-    function bindFeeEvents() {
-        [commissionInput, stampInput, transferInput].forEach(inp => {
-            inp.addEventListener('input', () => forceRefresh());
+
+    // 费率变动保存并刷新
+    function bindFeeAutoSave() {
+        const feeInputs = ['commissionFee', 'stampTax', 'transferFee'];
+        feeInputs.forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('input', () => {
+                saveFees();
+                renderAndSave();
+            });
         });
     }
-    
-    // 按钮事件
-    addBuyBtn.addEventListener('click', () => addTransaction('buy'));
-    addSellBtn.addEventListener('click', () => addTransaction('sell'));
-    resetBtn.addEventListener('click', resetAllTransactions);
-    refreshBtn.addEventListener('click', forceRefresh);
-    
-    // 初始化，示例为空
-    bindFeeEvents();
-    renderAndUpdate();
+
+    // 手动刷新
+    document.getElementById('refreshCalcBtn').addEventListener('click', () => renderAndSave());
+    document.getElementById('addBuyBtn').addEventListener('click', () => addTransaction('buy'));
+    document.getElementById('addSellBtn').addEventListener('click', () => addTransaction('sell'));
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+    // 加载历史数据
+    loadTransactions();
+    loadFees();
+    bindFeeAutoSave();
+    renderAndSave();
 </script>
 </body>
 </html>
