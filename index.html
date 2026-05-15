@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>专业持仓成本计算器 | 费用明细完整版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #f4f7fc;
+            margin: 0;
+            padding: 32px 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 主容器 - 更宽敞 */
+        .calculator {
+            max-width: 1600px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 头部 */
+        .header {
+            background: #0b2b3b;
+            padding: 32px 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        /* 双栏布局 */
+        .dashboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+            padding: 32px 40px;
+        }
+
+        /* 左侧交易区域 - 宽屏舒适 */
+        .trades-panel {
+            flex: 2.4;
+            background: #ffffff;
+            border-radius: 28px;
+            border: 1px solid #eef2f8;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            overflow-x: auto;
+            padding: 0 0 20px 0;
+        }
+
+        .panel-header {
+            padding: 20px 24px 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .panel-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1f2e3a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-info {
+            background: #eef2ff;
+            color: #2563eb;
+            border-radius: 100px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        /* 表格样式 - 字体放大，行高舒适 */
+        .trades-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 900px;
+        }
+
+        .trades-table th {
+            text-align: left;
+            padding: 16px 12px 14px 20px;
+            background-color: #fafcff;
+            color: #2c3e50;
+            font-weight: 600;
+            border-bottom: 1px solid #e6edf4;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
+        }
+
+        .trades-table td {
+            padding: 14px 12px 14px 20px;
+            border-bottom: 1px solid #f0f4f9;
+            vertical-align: middle;
+            color: #1e2f3f;
+        }
+
+        /* 交易类型徽章 */
+        .trade-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-align: center;
+            min-width: 70px;
+        }
+
+        .trade-buy {
+            background: #e3f7ec;
+            color: #0c6b3f;
+        }
+
+        .trade-sell {
+            background: #fee9e7;
+            color: #bc1c2e;
+        }
+
+        /* 输入框 - 更清晰 */
+        .inline-input {
+            width: 100px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #d0dfeb;
+            background: white;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: 0.15s;
+        }
+
+        .inline-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+
+        /* 费用明细卡片样式 */
+        .fee-detail {
+            background: #f8fafd;
+            padding: 6px 12px;
+            border-radius: 24px;
+            font-family: 'SF Mono', 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            display: inline-block;
+            color: #2c5a7a;
+            font-weight: 500;
+        }
+
+        .money-number {
+            font-family: monospace;
+            font-weight: 600;
+            font-size: 0.9rem;
+            background: #f8fafc;
+            padding: 4px 8px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            color: #9aaebf;
+            padding: 4px 8px;
+            border-radius: 30px;
+            transition: all 0.1s;
+        }
+
+        .action-btn:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* 右侧面板 */
+        .summary-panel {
+            flex: 1.2;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .config-card, .result-card {
+            background: white;
+            border-radius: 28px;
+            border: 1px solid #eef2f8;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2e3a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+        }
+
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .fee-row label {
+            font-weight: 600;
+            color: #2c4c6c;
+            font-size: 0.9rem;
+        }
+
+        .fee-row input {
+            width: 140px;
+            padding: 10px 14px;
+            border-radius: 30px;
+            border: 1px solid #cbdde9;
+            text-align: right;
+            font-size: 0.9rem;
+            background: #fff;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 14px 0;
+            border-bottom: 1px solid #eef2fa;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 500;
+            color: #4b6f8e;
+            font-size: 0.9rem;
+        }
+
+        .result-value {
+            font-weight: 700;
+            font-family: monospace;
+            font-size: 1.05rem;
+            color: #1f2e3a;
+        }
+
+        .highlight-number {
+            color: #f5a623;
+            font-size: 1.1rem;
+        }
+
+        .add-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            padding: 0 20px 20px 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            background: #f0f4f9;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #2c5a7a;
+        }
+
+        .btn-primary {
+            background: #1e6f9f;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn-primary:hover {
+            background: #0f5a84;
+        }
+
+        .btn-outline {
+            border: 1px solid #caddf0;
+            background: white;
+        }
+
+        .btn-outline:hover {
+            background: #eef4fc;
+        }
+
+        .footnote {
+            font-size: 0.75rem;
+            text-align: center;
+            color: #6f8eaa;
+            border-top: 1px solid #ecf3f9;
+            padding: 20px 40px 24px;
+            background: #ffffff;
+        }
+
+        @media (max-width: 1000px) {
+            body { padding: 20px; }
+            .dashboard { flex-direction: column; padding: 20px; }
+            .header { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+<div class="calculator">
+    <div class="header">
+        <h1>📊 持仓成本分析仪</h1>
+        <p>完整计算每笔交易 · 佣金 / 印花税 / 过户费 · 实时查看持仓成本</p>
+    </div>
+
+    <div class="dashboard">
+        <!-- 左侧交易列表 -->
+        <div class="trades-panel">
+            <div class="panel-header">
+                <h2>📋 交易流水 <span class="badge-info">每笔费用明细可见</span></h2>
+                <div class="add-buttons" style="margin:0; padding:0;">
+                    <button class="btn btn-outline" id="addBuyBtn">➕ 买入</button>
+                    <button class="btn btn-outline" id="addSellBtn">📤 卖出</button>
+                    <button class="btn btn-outline" id="resetDemoBtn">🔄 重置示例</button>
+                </div>
+            </div>
+            <div style="overflow-x: auto; margin-top: 8px;">
+                <table class="trades-table" id="tradesTable">
+                    <thead>
+                        <tr><th>类型</th><th>价格(元)</th><th>股数</th><th>本次净现金流</th><th>费用明细 (佣金/印花税/过户)</th><th>持仓成本(累计)</th><th></th></tr>
+                    </thead>
+                    <tbody id="tradesBody"></tbody>
+                </table>
+            </div>
+            <div style="padding: 12px 20px 0 20px; font-size:0.75rem; color:#5f7f9e;">
+                💡 买入: 净现金流 = -(成交额+佣金+过户费) &nbsp;&nbsp;|&nbsp;&nbsp; 卖出: 净现金流 = 成交额 - 佣金 - 印花税 - 过户费
+            </div>
+        </div>
+
+        <!-- 右侧费率与结果 -->
+        <div class="summary-panel">
+            <div class="config-card">
+                <div class="card-title">⚙️ 交易费率</div>
+                <div class="fee-row"><label>📌 单笔佣金 (元/笔)</label><input type="number" id="commissionFee" step="1" value="5"></div>
+                <div class="fee-row"><label>🧾 印花税率 (%)</label><input type="number" id="stampTax" step="0.01" value="0.05"><span style="font-size:0.7rem; color:#6f8eaa;">(仅卖出)</span></div>
+                <div class="fee-row"><label>📄 过户费 (元/万股)</label><input type="number" id="transferFee" step="0.1" value="0"><span style="font-size:0.7rem; color:#6f8eaa;">ETF为0</span></div>
+            </div>
+
+            <div class="result-card">
+                <div class="card-title">📈 持仓概览</div>
+                <div class="result-item"><span class="result-label">📦 当前持股数量</span><span class="result-value" id="finalShares">0 股</span></div>
+                <div class="result-item"><span class="result-label">💰 累计总支出(含费)</span><span class="result-value" id="totalCost">0.00 元</span></div>
+                <div class="result-item"><span class="result-label">💸 累计总收入(净)</span><span class="result-value" id="totalIncome">0.00 元</span></div>
+                <div class="result-item"><span class="result-label">📉 净投入资金</span><span class="result-value" id="netInvest">0.00 元</span></div>
+                <div class="result-item"><span class="result-label">✨ 最新每股成本</span><span class="result-value highlight-number" id="avgCost">0.0000 元</span></div>
+                <div class="result-item"><span class="result-label">🏦 当前持仓市值</span><span class="result-value" id="currentMarketValue">0.00 元</span></div>
+                <div class="result-item"><span class="result-label">📊 浮动盈亏</span><span class="result-value" id="floatPL">0.00 元</span></div>
+            </div>
+            <button class="btn btn-primary" id="recalcBtn" style="width:100%;">⟳ 刷新计算</button>
+        </div>
+    </div>
+    <div class="footnote">
+        * 所有费用实时计入「本次净现金流」与持仓成本，买入为负向支出，卖出为正向收入。<br>
+        * 持仓市值基于最新一笔交易价格估算，浮动盈亏仅供模拟参考。
+    </div>
+</div>
+
+<script>
+    // 默认示例数据
+    let transactions = [
+        { id: Date.now() + 1, type: 'buy', price: 1.573, shares: 200 },
+        { id: Date.now() + 2, type: 'sell', price: 1.562, shares: 200 },
+        { id: Date.now() + 3, type: 'buy', price: 1.560, shares: 200 }
+    ];
+
+    // DOM
+    const tradesBody = document.getElementById('tradesBody');
+    const addBuy = document.getElementById('addBuyBtn');
+    const addSell = document.getElementById('addSellBtn');
+    const resetBtn = document.getElementById('resetDemoBtn');
+    const recalcBtn = document.getElementById('recalcBtn');
+    const commissionInp = document.getElementById('commissionFee');
+    const stampInp = document.getElementById('stampTax');
+    const transferInp = document.getElementById('transferFee');
+
+    const finalSharesSpan = document.getElementById('finalShares');
+    const totalCostSpan = document.getElementById('totalCost');
+    const totalIncomeSpan = document.getElementById('totalIncome');
+    const netInvestSpan = document.getElementById('netInvest');
+    const avgCostSpan = document.getElementById('avgCost');
+    const marketValSpan = document.getElementById('currentMarketValue');
+    const floatSpan = document.getElementById('floatPL');
+
+    // 费用计算函数
+    function calcBuy(price, shares, comm, transFeePer10k) {
+        const amount = price * shares;
+        let transfer = transFeePer10k > 0 ? (amount / 10000) * transFeePer10k : 0;
+        const totalOut = amount + comm + transfer;
+        return { amount, commission: comm, transfer, totalOut };
+    }
+
+    function calcSell(price, shares, comm, stampRate, transFeePer10k) {
+        const amount = price * shares;
+        let stamp = stampRate > 0 ? amount * (stampRate / 100) : 0;
+        let transfer = transFeePer10k > 0 ? (amount / 10000) * transFeePer10k : 0;
+        const totalIn = amount - comm - stamp - transfer;
+        return { amount, commission: comm, stamp, transfer, totalIn };
+    }
+
+    // 综合统计 + 明细
+    function getStats() {
+        let comm = parseFloat(commissionInp.value) || 0;
+        let stampRate = parseFloat(stampInp.value) || 0;
+        let transFee = parseFloat(transferInp.value) || 0;
+
+        let totalExp = 0, totalInc = 0, netShares = 0;
+        let details = [];
+        for (let tx of transactions) {
+            let price = parseFloat(tx.price), shares = parseInt(tx.shares);
+            if (isNaN(price) || isNaN(shares) || shares <= 0 || price <= 0) continue;
+            if (tx.type === 'buy') {
+                let buy = calcBuy(price, shares, comm, transFee);
+                totalExp += buy.totalOut;
+                netShares += shares;
+                details.push({ type: 'buy', price, shares, cashFlow: -buy.totalOut, feeDesc: `佣 ${buy.commission.toFixed(2)} | 过 ${buy.transfer.toFixed(2)}`, afterShares: netShares });
+            } else {
+                let sell = calcSell(price, shares, comm, stampRate, transFee);
+                totalInc += sell.totalIn;
+                netShares -= shares;
+                details.push({ type: 'sell', price, shares, cashFlow: sell.totalIn, feeDesc: `佣 ${sell.commission.toFixed(2)} | 印 ${sell.stamp.toFixed(2)} | 过 ${sell.transfer.toFixed(2)}`, afterShares: netShares });
+            }
+        }
+        let netInvest = totalExp - totalInc;
+        let avgCost = netShares > 0 ? netInvest / netShares : (netShares === 0 ? 0 : -1);
+        let lastPrice = 1.56;
+        for (let i=transactions.length-1; i>=0; i--) {
+            let p = parseFloat(transactions[i].price);
+            if (!isNaN(p) && p>0) { lastPrice = p; break; }
+        }
+        let currentMkt = netShares > 0 ? netShares * lastPrice : 0;
+        let floatPL = netShares > 0 && avgCost > 0 ? (lastPrice - avgCost) * netShares : 0;
+        return { netShares, totalExp, totalInc, netInvest, avgCost, currentMkt, floatPL, details, lastPrice };
+    }
+
+    // 刷新表格（字体/间距舒适版）
+    function renderTable() {
+        let stats = getStats();
+        let rows = '';
+        let cumulativeNet = 0;
+        let cumulativeShares = 0;
+        for (let idx = 0; idx < transactions.length; idx++) {
+            let tx = transactions[idx];
+            let price = parseFloat(tx.price), shares = parseInt(tx.shares);
+            if (isNaN(price) || isNaN(shares) || shares <= 0 || price <= 0) continue;
+            
+            // 重新模拟累计持仓成本（用于每一行的“持仓成本列”）
+            let tempExp = 0, tempInc = 0, tempShares = 0;
+            for (let j=0; j<=idx; j++) {
+                let t = transactions[j];
+                let p = parseFloat(t.price), s = parseInt(t.shares);
+                if (isNaN(p) || isNaN(s) || s<=0) continue;
+                let commT = parseFloat(commissionInp.value)||0, stampT = parseFloat(stampInp.value)||0, transT = parseFloat(transferInp.value)||0;
+                if (t.type === 'buy') {
+                    let buy = calcBuy(p, s, commT, transT);
+                    tempExp += buy.totalOut;
+                    tempShares += s;
+                } else {
+                    let sell = calcSell(p, s, commT, stampT, transT);
+                    tempInc += sell.totalIn;
+                    tempShares -= s;
+                }
+            }
+            let netInvestNow = tempExp - tempInc;
+            let holdingCost = (tempShares > 0) ? (netInvestNow / tempShares) * tempShares : 0;
+            
+            let cashFlow = 0, feeText = '';
+            let commCurr = parseFloat(commissionInp.value)||0, stampCurr = parseFloat(stampInp.value)||0, transCurr = parseFloat(transferInp.value)||0;
+            if (tx.type === 'buy') {
+                let b = calcBuy(price, shares, commCurr, transCurr);
+                cashFlow = -b.totalOut;
+                feeText = `佣 ${b.commission.toFixed(2)} | 过 ${b.transfer.toFixed(2)}`;
+            } else {
+                let s = calcSell(price, shares, commCurr, stampCurr, transCurr);
+                cashFlow = s.totalIn;
+                feeText = `佣 ${s.commission.toFixed(2)} | 印 ${s.stamp.toFixed(2)} | 过 ${s.transfer.toFixed(2)}`;
+            }
+            let typeLabel = tx.type === 'buy' ? '买入' : '卖出';
+            let typeClass = tx.type === 'buy' ? 'trade-buy' : 'trade-sell';
+            rows += `<tr>
+                <td><span class="trade-badge ${typeClass}">${typeLabel}</span></td>
+                <td><input type="number" step="0.001" class="inline-input edit-price" value="${price}" data-idx="${idx}" style="width:95px;"></td>
+                <td><input type="number" step="1" class="inline-input edit-shares" value="${shares}" data-idx="${idx}" style="width:85px;"></td>
+                <td><span class="money-number">${cashFlow.toFixed(2)} 元</span></td>
+                <td><span class="fee-detail">${feeText}</span></td>
+                <td><span class="money-number">${holdingCost.toFixed(2)} 元</span></td>
+                <td><button class="action-btn" data-remove="${idx}">✕</button></td>
+            </tr>`;
+        }
+        tradesBody.innerHTML = rows;
+        // 绑定编辑事件
+        document.querySelectorAll('.edit-price').forEach(inp => {
+            inp.onchange = (e) => { let idx = e.target.dataset.idx; if(transactions[idx]) transactions[idx].price = parseFloat(e.target.value); renderTable(); updateStats(); };
+        });
+        document.querySelectorAll('.edit-shares').forEach(inp => {
+            inp.onchange = (e) => { let idx = e.target.dataset.idx; if(transactions[idx]) transactions[idx].shares = parseInt(e.target.value); renderTable(); updateStats(); };
+        });
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.onclick = (e) => { let idx = btn.dataset.remove; if(transactions[idx]) { transactions.splice(idx,1); renderTable(); updateStats(); } };
+        });
+    }
+
+    function updateStats() {
+        let s = getStats();
+        finalSharesSpan.innerText = s.netShares >= 0 ? `${s.netShares} 股` : (s.netShares<0 ? `空仓` : `0 股`);
+        totalCostSpan.innerText = s.totalExp.toFixed(2) + ' 元';
+        totalIncomeSpan.innerText = s.totalInc.toFixed(2) + ' 元';
+        netInvestSpan.innerText = s.netInvest.toFixed(2) + ' 元';
+        avgCostSpan.innerText = (s.avgCost > 0 ? s.avgCost.toFixed(4) : (s.netShares===0 ? '0.0000' : '----')) + ' 元';
+        marketValSpan.innerText = s.currentMkt.toFixed(2) + ' 元';
+        floatSpan.innerText = (s.floatPL >=0 ? `+${s.floatPL.toFixed(2)}` : `${s.floatPL.toFixed(2)}`) + ' 元';
+    }
+
+    function addTransaction(type) {
+        let lastPrice = transactions.length ? transactions[transactions.length-1].price : 1.55;
+        let newPrice = type === 'buy' ? lastPrice * 0.99 : lastPrice * 1.01;
+        newPrice = Math.round(newPrice * 1000) / 1000;
+        transactions.push({ id: Date.now(), type, price: newPrice, shares: 200 });
+        renderTable(); updateStats();
+    }
+    function resetDefault() {
+        transactions = [
+            { id: Date.now()+1, type: 'buy', price: 1.573, shares: 200 },
+            { id: Date.now()+2, type: 'sell', price: 1.562, shares: 200 },
+            { id: Date.now()+3, type: 'buy', price: 1.560, shares: 200 }
+        ];
+        renderTable(); updateStats();
+    }
+
+    addBuy.onclick = () => addTransaction('buy');
+    addSell.onclick = () => addTransaction('sell');
+    resetBtn.onclick = resetDefault;
+    recalcBtn.onclick = () => { renderTable(); updateStats(); };
+    [commissionInp, stampInp, transferInp].forEach(i => i.oninput = () => { renderTable(); updateStats(); });
+    
+    renderTable();
+    updateStats();
+</script>
+</body>
+</html>
